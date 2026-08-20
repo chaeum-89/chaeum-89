@@ -59,7 +59,8 @@
     display:flex; align-items:center; justify-content:center; text-align:center; line-height:1.3;
     font-family:'Pretendard',sans-serif; font-weight:700; font-size:12.5px; color:var(--white); }
   .ci-title{ font-weight:700; font-size:14px; margin-bottom:3px; }
-  .ci-price{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--brass-deep); font-weight:600; margin-bottom:4px;}
+  .ci-price{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--brass-deep); font-weight:600; margin-bottom:2px;}
+  .ci-sub{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-bottom:5px; }
   .ci-note{ font-size:11px; color:var(--ink-soft); line-height:1.5; }
   .check{ position:absolute; top:12px; right:12px; width:17px; height:17px; border-radius:50%; border:1.5px solid var(--line); background:var(--white); }
   .choice.selected .check{ border-color:var(--brass); background:var(--brass); }
@@ -147,43 +148,74 @@
   const COLORS = ['#8C6417','#2F3E58','#7A8B6F','#9C5B4A','#5B7C99','#8A6E9C'];
   function colorFor(i){ return COLORS[i % COLORS.length]; }
 
+  // ---------- pricing helpers (shared by card display + final compute) ----------
+  function rangeText(low, high){
+    return low===high ? fmt(low) : fmt(low)+'~'+fmt(high);
+  }
+  function optTotal(def, opt){
+    if(opt.low===0 && opt.high===0) return {l:0, h:0};
+    if(opt.fixed) return {l:opt.low, h:opt.high};
+    if(def.perPyeong) return {l:opt.low*state.pyeong, h:opt.high*state.pyeong};
+    if(def.perMeter){
+      const len = def.refLength*state.pyeong/def.refPyeong;
+      return {l:opt.low*len, h:opt.high*len};
+    }
+    if(def.perBath) return {l:opt.low*state.bathCount, h:opt.high*state.bathCount};
+    return {l:opt.low, h:opt.high};
+  }
+  function priceLabelFor(l, h, openEnded){
+    if(l===0 && h===0) return '0원';
+    if(Math.round(l)===Math.round(h)) return fmt(Math.round(l))+'만원'+(openEnded?' 이상':'');
+    return fmt(Math.round(l))+'~'+fmt(Math.round(h))+'만원';
+  }
+  function unitSubtext(def, opt){
+    if(opt.low===0 && opt.high===0) return null;
+    if(opt.fixed) return null;
+    if(def.perPyeong) return `평당 ${rangeText(opt.low,opt.high)}만원 × ${state.pyeong}평`;
+    if(def.perMeter){
+      const len = (def.refLength*state.pyeong/def.refPyeong).toFixed(1);
+      return `M당 ${rangeText(opt.low,opt.high)}만원 × ${len}m`;
+    }
+    return null;
+  }
+
   // ============================================================
   // DATA: 27 generic single-select steps
   // ============================================================
   const GENERIC_STEPS = [
-    { key:'demolition', label:'철거 범위', title:'철거는 어느 범위까지 진행할까요?', desc:'평당 단가 × 입력하신 평형 기준으로 계산돼요.', scalePyeong:true, options:[
-      { id:'budget', label:'예산 중심형', low:448, high:608, note:'철거 최소화 · 기본철거·붙박이가구 철거·바닥재/조명/도배 철거' },
-      { id:'common', label:'공용부 집중형', low:800, high:1024, note:'예산중심형 포함 · 욕실 타일철거 후 방수·배관 위치이동·주방 설비이동' },
-      { id:'highend', label:'하이엔드 마감', low:2000, high:2600, note:'공용부집중형 포함 · 천장·벽체 전체철거·전선 모두 교체·발코니 방수' },
+    { key:'demolition', label:'철거 범위', title:'어떤 방향으로 진행할까요? (철거 범위 포함)', desc:'평당 단가 × 입력하신 평형 기준으로 계산돼요.', perPyeong:true, options:[
+      { id:'budget', label:'예산 중심형', low:14, high:19, note:'철거 최소화 · 기본철거·붙박이가구 철거·바닥재/조명/도배 철거' },
+      { id:'common', label:'공용부 집중형', low:25, high:32, note:'예산중심형 포함 · 욕실 타일철거 후 방수·배관 위치이동·주방 설비이동' },
+      { id:'highend', label:'하이엔드 마감', low:2000, high:2000, fixed:true, openEnded:true, note:'공용부집중형 포함 · 천장·벽체 전체철거·전선 모두 교체·발코니 방수 · 상담 내용에 따라 금액 변동' },
     ]},
-    { key:'sash', label:'샷시(창호)', title:'샷시(창호) 교체하시나요?', desc:'컨셉 기준 추천값이 미리 선택되어 있어요. 평당 단가 × 평형 기준.', scalePyeong:true, options:[
-      { id:'viewframe', label:'뷰프레임', low:1760, high:1920, note:'LX하우시스 · 10년 보증 · 비교적 고가, 브랜드 가치값' },
-      { id:'kcc', label:'KCC / 영림', low:1440, high:1600, note:'13년 이상 보증 · 뷰프레임 대비 저렴하나 눈차 미미' },
-      { id:'local', label:'예림', low:1120, high:1280, note:'대리점 자체보증 · 브랜드 대비 저렴하나 품질보증 애매' },
-      { id:'film', label:'필름랩핑', low:256, high:320, note:'창틀에 큰 문제 없을 때, 샷시는 그대로 두고 필름으로 커버' },
+    { key:'sash', label:'샷시(창호)', title:'샷시(창호) 교체하시나요?', desc:'컨셉 기준 추천값이 미리 선택되어 있어요. 평당 단가 × 평형 기준.', perPyeong:true, options:[
+      { id:'viewframe', label:'뷰프레임', low:55, high:60, note:'LX하우시스 · 10년 보증 · 비교적 고가, 브랜드 가치값' },
+      { id:'kcc', label:'KCC / 영림', low:45, high:50, note:'13년 이상 보증 · 뷰프레임 대비 저렴하나 눈차 미미' },
+      { id:'local', label:'예림', low:35, high:40, note:'대리점 자체보증 · 브랜드 대비 저렴하나 품질보증 애매' },
+      { id:'film', label:'필름랩핑', low:8, high:10, note:'창틀에 큰 문제 없을 때, 샷시는 그대로 두고 필름으로 커버' },
       { id:'keep', label:'현상태 유지', low:0, high:0, note:'현재 샷시 상태가 좋고 깨끗하다면 이 선택이 유리' },
     ]},
-    { key:'wallpaper', label:'벽체·천장 마감재', title:'벽체와 천장 마감재는 어떤 자재로 할까요?', desc:'전용면적 평당 단가(자재+시공) 기준. 평당 단가 × 평형.', scalePyeong:true, options:[
-      { id:'silk', label:'실크도배', low:480, high:544, note:'현장이 깨끗하고 짐이 없는 노멀 기준 · 퍼티작업+공용부 무몰딩+올초배' },
-      { id:'diamang', label:'디아망', low:544, high:608, note:'디아망 등급 · 동급 신한벽지 파사드·회벽 모던 질감' },
-      { id:'diamangfortis', label:'디아망포티스', low:608, high:672, note:'LX하우시스 디아망포티스 · 동급 신한벽지 파사드월가드' },
+    { key:'wallpaper', label:'벽체·천장 마감재', title:'벽체와 천장 마감재는 어떤 자재로 할까요?', desc:'전용면적 평당 단가(자재+시공) 기준. 평당 단가 × 평형.', perPyeong:true, options:[
+      { id:'silk', label:'실크도배', low:18, high:20, note:'현장이 깨끗하고 짐이 없는 노멀 기준 · 퍼티작업+공용부 무몰딩+올초배' },
+      { id:'diamang', label:'디아망', low:20, high:22, note:'디아망 등급 · 동급 신한벽지 파사드·회벽 모던 질감' },
+      { id:'diamangfortis', label:'디아망포티스', low:22, high:24, note:'LX하우시스 디아망포티스 · 동급 신한벽지 파사드월가드' },
     ]},
-    { key:'floor', label:'바닥재', title:'바닥재는 무엇으로 할까요?', desc:'전용면적 평당 자재+시공 기준. 평당 단가 × 평형.', scalePyeong:true, options:[
-      { id:'wood', label:'강마루(동화마루 그란데)', low:352, high:448, note:'베스트 아이템 · 가장 무난하고 많이 선택 · 원목마루 대비 스크래치에 강함' },
-      { id:'porcelain', label:'포세린타일(600×600)', low:576, high:800, note:'고급 주거에 많이 시공 · 단단하고 관리 편한 대신 접지·틈새 위험' },
-      { id:'vinyl32', label:'장판(3.2T)', low:192, high:256, note:'물에 강하고 가격이 저렴 · 대신 찌러지기 쉬움' },
-      { id:'vinyl5', label:'장판(5T)', low:224, high:288, note:'3.2T 대비 두께감 있고 발감이 좋음 · 대신 단가가 조금 더 높음' },
-      { id:'solidwood', label:'원목마루(지복득마루)', low:896, high:1440, note:'천연 원목이라 고급스럽고 보행감이 좋음 · 대신 잘 찍히고 물에는 약함' },
+    { key:'floor', label:'바닥재', title:'바닥재는 무엇으로 할까요?', desc:'전용면적 평당 자재+시공 기준. 평당 단가 × 평형.', perPyeong:true, options:[
+      { id:'wood', label:'강마루(동화마루 그란데)', low:11, high:14, note:'베스트 아이템 · 가장 무난하고 많이 선택 · 원목마루 대비 스크래치에 강함' },
+      { id:'porcelain', label:'포세린타일(600×600)', low:18, high:25, note:'고급 주거에 많이 시공 · 단단하고 관리 편한 대신 접지·틈새 위험' },
+      { id:'vinyl32', label:'장판(3.2T)', low:6, high:8, note:'물에 강하고 가격이 저렴 · 대신 찌러지기 쉬움' },
+      { id:'vinyl5', label:'장판(5T)', low:7, high:9, note:'3.2T 대비 두께감 있고 발감이 좋음 · 대신 단가가 조금 더 높음' },
+      { id:'solidwood', label:'원목마루(지복득마루)', low:28, high:45, note:'천연 원목이라 고급스럽고 보행감이 좋음 · 대신 잘 찍히고 물에는 약함' },
     ]},
-    { key:'sink', label:'싱크대', title:'싱크대는 어떤 방식으로 할까요?', desc:'평수로 추정한 싱크대 길이 × 미터당 단가(32평 기준 5m) 기준.', scalePyeong:true, options:[
-      { id:'basic', label:'보급형 사제(비브랜드)', low:400, high:500, note:'인조대리석 상판 기준 · 가성비 좋음 · 업체마다 마감 차이 있음' },
-      { id:'brand', label:'브랜드(한샘)', low:500, high:650, note:'인조대리석 상판 기준 · 규격화된 품질과 서비스, AS 편리' },
-      { id:'custom', label:'하이엔드커스텀', low:1000, high:1300, note:'하드웨어·마감재를 자유롭게 선택하는 맞춤 가구 · 비쌈, 주정치' },
+    { key:'sink', label:'싱크대', title:'싱크대는 어떤 방식으로 할까요?', desc:'평수로 추정한 싱크대 길이 × 미터당 단가(17평 기준 2.8m) 기준.', perMeter:true, refLength:2.8, refPyeong:17, options:[
+      { id:'basic', label:'보급형 사제(비브랜드)', low:80, high:100, note:'인조대리석 상판 기준 · 가성비 좋음 · 업체마다 마감 차이 있음' },
+      { id:'brand', label:'브랜드(한샘)', low:100, high:130, note:'인조대리석 상판 기준 · 규격화된 품질과 서비스, AS 편리' },
+      { id:'custom', label:'하이엔드커스텀', low:200, high:200, openEnded:true, note:'하드웨어·마감재를 자유롭게 선택하는 맞춤 가구 · 비쌈 · 상담 내용에 따라 금액 변동' },
     ]},
-    { key:'sinktop', label:'싱크대 상판', title:'싱크대 상판은 어떤 소재로 할까요?', desc:'싱크대 기본가에 인조대리석이 포함되어 있어요 · 상위 소재는 추가금.', scalePyeong:true, options:[
+    { key:'sinktop', label:'싱크대 상판', title:'싱크대 상판은 어떤 소재로 할까요?', desc:'싱크대 기본가에 인조대리석이 포함되어 있어요 · 상위 소재는 추가금 (17평 기준 2.8m).', perMeter:true, refLength:2.8, refPyeong:17, options:[
       { id:'himacs', label:'인조대리석(하이막스)', low:0, high:0, note:'싱크대 기본 사양 · 이음매 안 보이게 시공 가능 · 다양한 컬러' },
-      { id:'kanstone', label:'엔지니어드스톤(칸스톤)', low:175, high:175, note:'인조대리석 대비 추가금 · 가공·물류·시공비 포함 · 단점 보완, 흠집에 강함' },
-      { id:'ceramic', label:'세라믹', low:300, high:300, note:'대비 추가금 · 가장 예쁘고 위생적, 열에 강함 · 대신 이음매 티나고 비쌈' },
+      { id:'kanstone', label:'엔지니어드스톤(칸스톤)', low:35, high:35, note:'인조대리석 대비 추가금 · 가공·물류·시공비 포함 · 단점 보완, 흠집에 강함' },
+      { id:'ceramic', label:'세라믹', low:60, high:60, note:'대비 추가금 · 가장 예쁘고 위생적, 열에 강함 · 대신 이음매 티나고 비쌈' },
     ]},
     { key:'sinkbowl', label:'싱크볼', title:'싱크볼은 무엇으로 할까요?', desc:'제품 판매가 기준 · 설치비 별도.', options:[
       { id:'wonyang', label:'원앙 한스 TZN 850', low:22, high:22, note:'엠보 나노코팅 사각싱크볼 · 배송비 포함' },
@@ -200,6 +232,7 @@
     { key:'bathtile', label:'욕실 타일공사', title:'욕실 타일공사는 어떻게 할까요?', desc:'욕실 한 칸 기준 · 타일+인건비+부자재+경비 합계.', perBath:true, options:[
       { id:'overlay', label:'덧방 시공', low:100, high:130, note:'국산/수입 일반 도기질 타일 기준 · 공사기간 짧음 · 대신 구조 변경 불가' },
       { id:'fullredo', label:'전체 철거 후 시공', low:180, high:230, note:'기존 타일·방수까지 전체 철거 후 재시공 · 구조 변경 가능, 공사기간 김' },
+      { id:'fullredo_porcelain', label:'올철거 후 포세린타일', low:380, high:380, openEnded:true, note:'포세린타일 600×1200 · 고급 호텔 욕실 느낌, 유지관리 편함 · 대신 공사기간 길고 비쌈' },
     ]},
     { key:'toilet', label:'[욕실] 변기', title:'변기는 어떤 타입으로 할까요?', desc:'물류·시공비 별도 기준 · 욕실 개수만큼 반영돼요.', perBath:true, options:[
       { id:'inus', label:'이누스 IC 709E', low:14.8, high:14.8, note:'투피스 양변기 · 가성비 좋음 · 깔끔하고 편리한 관리' },
@@ -259,9 +292,9 @@
       { id:'exposed', label:'노출형', low:5.5, high:5.5, note:'American Standard · 벽 파쇄 없이 부착 · 베스트셀러' },
       { id:'embedded', label:'매립형', low:16, high:16, note:'벽 파쇄 포함 · 공간을 차지하지 않아 좋고 고급스러움 · 벽을 파쇄해야 해서 철거 필요함' },
     ]},
-    { key:'heating', label:'난방배관', title:'난방배관을 교체하시나요?', desc:'평당 자재+시공 기준 · 급수배수 등 수도공사는 별도. 평당 단가 × 평형.', scalePyeong:true, options:[
-      { id:'partial', label:'홈파기 난방관 교체', low:608, high:736, note:'기존 바닥 유지하며 홈을 파서 배관 교체 · 공사기간 1~2일 · 소음 적음' },
-      { id:'full', label:'전체 방통 난방관 교체', low:1120, high:1280, note:'바닥 전체 철거 후 재포설 · 공사기간 4~5일 · 소음 민원 발생 · 양생기간 필요' },
+    { key:'heating', label:'난방배관', title:'난방배관을 교체하시나요?', desc:'평당 자재+시공 기준 · 급수배수 등 수도공사는 별도. 평당 단가 × 평형.', perPyeong:true, options:[
+      { id:'partial', label:'홈파기 난방관 교체', low:19, high:23, note:'기존 바닥 유지하며 홈을 파서 배관 교체 · 공사기간 1~2일 · 소음 적음' },
+      { id:'full', label:'전체 방통 난방관 교체', low:35, high:40, note:'바닥 전체 철거 후 재포설 · 공사기간 4~5일 · 소음 민원 발생 · 양생기간 필요' },
       { id:'keep', label:'현상태 유지', low:0, high:0, note:'현재 난방배관 상태가 양호하다면 이 선택이 유리' },
     ]},
     { key:'aircon', label:'시스템에어컨', title:'시스템에어컨을 설치할까요?', desc:'실내기 대수 기준 평균 견적 범위 · 실외기 위치와 현장 난이도에 따라 추가금 발생 가능.', options:[
@@ -273,10 +306,10 @@
       { id:'u7', label:'7대', low:930, high:1100, note:'실외기 2대(예: 4대용+3대용)' },
       { id:'own', label:'고객이 업체 선정', low:0, high:0, note:'직접 업체를 선정해서 진행하시는 경우' },
     ]},
-    { key:'package', label:'전기·목공·타일·필름', title:'전기·목공·타일·필름은 어떤 등급으로 진행할까요?', desc:'개별 단가가 불명확해 등급 패키지로 통합. 평당 단가 × 평형.', scalePyeong:true, options:[
-      { id:'value', label:'실속형', low:512, high:1024, note:'전선 유지·목공 최소화 · 9미리 문선·2계단 몰딩·타일 덧방' },
-      { id:'standard', label:'표준형', low:1536, high:2816, note:'신설 전선만 교체 · 공용부 무몰딩·무문선·무걸레받이 · 발코니 타일은 덧방' },
-      { id:'premium', label:'프리미엄형', low:3840, high:4600, note:'전체 마감재 및 전선 등 재시공 · 특수 조명 및 아트월 등 목공 · 고급마감재' },
+    { key:'package', label:'전기·목공·타일·필름', title:'전기·목공·타일·필름은 어떤 등급으로 진행할까요?', desc:'개별 단가가 불명확해 등급 패키지로 통합. 평당 단가 × 평형.', perPyeong:true, options:[
+      { id:'value', label:'실속형', low:16, high:32, note:'전선 유지·목공 최소화 · 9미리 문선·2계단 몰딩·타일 덧방' },
+      { id:'standard', label:'표준형', low:48, high:88, note:'신설 전선만 교체 · 공용부 무몰딩·무문신·무걸레받이 · 발코니 타일은 덧방' },
+      { id:'premium', label:'프리미엄형', low:120, high:120, openEnded:true, note:'전체 마감재 및 전선 등 재시공 · 특수 조명 및 아트월 등 목공 · 고급마감재 · 상담 내용에 따라 금액 변동' },
     ]},
     { key:'lighting', label:'조명', title:'조명은 어떤 구성으로 할까요?', desc:'거실·침실·주방 등 세트 기준 · 컨셉 기준 추천값.', options:[
       { id:'basic', label:'일반 노출조명', low:60, high:120, note:'기존 조명 자리 그대로 교체하는 기준 · 조명 추가나 스위치 추가는 비용 추가됨' },
@@ -287,9 +320,9 @@
       { id:'normal', label:'일반 수성페인트', low:30, high:50, note:'가성비 위주, 곰팡이·결로 방지 기능 없음(임대용 추천)' },
       { id:'insulated', label:'단열공사 후 페인트', low:200, high:260, note:'곰팡이·결로 방지 효과, 단열공사 포함' },
     ]},
-    { key:'cleaning', label:'입주청소', title:'입주청소를 진행할까요?', desc:'전용면적 평당 단가 · 직접 하시려면 건너뛰기. 평당 단가 × 평형.', scalePyeong:true, options:[
-      { id:'normal', label:'일반 입주청소', low:67, high:90, note:'공사 분진, 몹밥, 시멘트·실리콘 자국 제거' },
-      { id:'premium', label:'특수/고급 준공청소', low:99, high:150, note:'친환경 스팀, 피톤치드 · 대형 평수·특수자재' },
+    { key:'cleaning', label:'입주청소', title:'입주청소를 진행할까요?', desc:'전용면적 평당 단가 · 직접 하시려면 건너뛰기. 평당 단가 × 평형.', perPyeong:true, options:[
+      { id:'normal', label:'일반 입주청소', low:2.1, high:2.8, note:'공사 분진, 몹밥, 시멘트·실리콘 자국 제거' },
+      { id:'premium', label:'특수/고급 준공청소', low:3.1, high:3.9, note:'친환경 스팀, 피톤치드 · 대형 평수·특수자재' },
     ]},
   ];
 
@@ -339,12 +372,15 @@
       <p class="step-desc">${def.desc}</p>
       <div class="choice-grid ${cols}" id="grid_${def.key}">`;
     def.options.forEach((opt,i)=>{
-      const priceLabel = (opt.low===0 && opt.high===0) ? '0원' : (opt.low===opt.high ? fmt(opt.low)+'만원' : fmt(opt.low)+'~'+fmt(opt.high)+'만원');
+      const { l, h } = optTotal(def, opt);
+      const priceLabel = priceLabelFor(l, h, opt.openEnded);
+      const sub = unitSubtext(def, opt);
       html += `<div class="choice" data-id="${opt.id}">
         <div class="check"></div>
         <div class="swatch" style="background:${colorFor(i)}">${opt.label}</div>
         <div class="ci-title">${opt.label}</div>
         <div class="ci-price">${priceLabel}</div>
+        ${sub ? `<div class="ci-sub">${sub}</div>` : ''}
         <div class="ci-note">${opt.note}</div>
       </div>`;
     });
@@ -562,9 +598,7 @@
       const selId = state.selections[def.key];
       if(!selId) return;
       const opt = def.options.find(o=>o.id===selId);
-      let l=opt.low, h=opt.high;
-      if(def.scalePyeong){ l = l*state.pyeong/32; h = h*state.pyeong/32; }
-      if(def.perBath){ l = l*state.bathCount; h = h*state.bathCount; }
+      const { l, h } = optTotal(def, opt);
       low += l; high += h;
       rows.push([def.label, opt.label, l, h]);
     });
