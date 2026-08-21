@@ -61,6 +61,12 @@
   .ci-title{ font-weight:700; font-size:14px; margin-bottom:3px; }
   .ci-price{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--brass-deep); font-weight:600; margin-bottom:2px;}
   .ci-sub{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-bottom:5px; }
+  .bath-tabs{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .bath-tab{ font-family:'Pretendard',sans-serif; font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:100px;
+    border:1.5px solid var(--line); background:var(--white); color:var(--ink-soft); cursor:pointer; transition:.15s ease; }
+  .bath-tab:hover{ border-color:var(--brass); }
+  .bath-tab.active{ background:var(--ink); border-color:var(--ink); color:var(--white); }
+  .bath-tab.filled:not(.active){ border-color:var(--brass); color:var(--brass-deep); }
   .ci-note{ font-size:11px; color:var(--ink-soft); line-height:1.5; }
   .check{ position:absolute; top:12px; right:12px; width:17px; height:17px; border-radius:50%; border:1.5px solid var(--line); background:var(--white); }
   .choice.selected .check{ border-color:var(--brass); background:var(--brass); }
@@ -152,15 +158,40 @@
   function rangeText(low, high){
     return low===high ? fmt(low) : fmt(low)+'~'+fmt(high);
   }
+  function estimateLength(anchors, pyeong){
+    // piecewise-linear interpolation through given [pyeong, length] anchor points,
+    // extrapolated using the nearest segment's slope outside the given range.
+    const pts = anchors;
+    if(pyeong <= pts[0][0]){
+      const slope = (pts[1][1]-pts[0][1])/(pts[1][0]-pts[0][0]);
+      return Math.max(1.5, pts[0][1] + slope*(pyeong-pts[0][0]));
+    }
+    const last = pts.length-1;
+    if(pyeong >= pts[last][0]){
+      const slope = (pts[last][1]-pts[last-1][1])/(pts[last][0]-pts[last-1][0]);
+      return pts[last][1] + slope*(pyeong-pts[last][0]);
+    }
+    for(let i=0;i<last;i++){
+      if(pyeong>=pts[i][0] && pyeong<=pts[i+1][0]){
+        const t = (pyeong-pts[i][0])/(pts[i+1][0]-pts[i][0]);
+        return pts[i][1] + t*(pts[i+1][1]-pts[i][1]);
+      }
+    }
+    return pts[last][1];
+  }
+  function lengthFor(def){
+    if(def.lengthAnchors) return estimateLength(def.lengthAnchors, state.pyeong);
+    return def.refLength*state.pyeong/def.refPyeong;
+  }
   function optTotal(def, opt){
     if(opt.low===0 && opt.high===0) return {l:0, h:0};
     if(opt.fixed) return {l:opt.low, h:opt.high};
     if(def.perPyeong) return {l:opt.low*state.pyeong, h:opt.high*state.pyeong};
     if(def.perMeter){
-      const len = def.refLength*state.pyeong/def.refPyeong;
+      const len = lengthFor(def);
       return {l:opt.low*len, h:opt.high*len};
     }
-    if(def.perBath) return {l:opt.low*state.bathCount, h:opt.high*state.bathCount};
+    if(def.perBath) return {l:opt.low, h:opt.high};
     return {l:opt.low, h:opt.high};
   }
   function priceLabelFor(l, h, openEnded){
@@ -173,7 +204,7 @@
     if(opt.fixed) return null;
     if(def.perPyeong) return `평당 ${rangeText(opt.low,opt.high)}만원 × ${state.pyeong}평`;
     if(def.perMeter){
-      const len = (def.refLength*state.pyeong/def.refPyeong).toFixed(1);
+      const len = lengthFor(def).toFixed(1);
       return `M당 ${rangeText(opt.low,opt.high)}만원 × ${len}m`;
     }
     return null;
@@ -207,12 +238,12 @@
       { id:'vinyl5', label:'장판(5T)', low:7, high:9, note:'3.2T 대비 두께감 있고 발감이 좋음 · 대신 단가가 조금 더 높음' },
       { id:'solidwood', label:'원목마루(지복득마루)', low:28, high:45, note:'천연 원목이라 고급스럽고 보행감이 좋음 · 대신 잘 찍히고 물에는 약함' },
     ]},
-    { key:'sink', label:'싱크대', title:'싱크대는 어떤 방식으로 할까요?', desc:'평수로 추정한 싱크대 길이 × 미터당 단가(17평 기준 2.8m) 기준.', perMeter:true, refLength:2.8, refPyeong:17, options:[
+    { key:'sink', label:'싱크대', title:'싱크대는 어떤 방식으로 할까요?', desc:'평수로 추정한 싱크대 길이 × 미터당 단가 기준.', perMeter:true, lengthAnchors:[[25,3.6],[30,4.8],[42,7.4]], options:[
       { id:'basic', label:'보급형 사제(비브랜드)', low:80, high:100, note:'인조대리석 상판 기준 · 가성비 좋음 · 업체마다 마감 차이 있음' },
       { id:'brand', label:'브랜드(한샘)', low:100, high:130, note:'인조대리석 상판 기준 · 규격화된 품질과 서비스, AS 편리' },
       { id:'custom', label:'하이엔드커스텀', low:200, high:200, openEnded:true, note:'하드웨어·마감재를 자유롭게 선택하는 맞춤 가구 · 비쌈 · 상담 내용에 따라 금액 변동' },
     ]},
-    { key:'sinktop', label:'싱크대 상판', title:'싱크대 상판은 어떤 소재로 할까요?', desc:'싱크대 기본가에 인조대리석이 포함되어 있어요 · 상위 소재는 추가금 (17평 기준 2.8m).', perMeter:true, refLength:2.8, refPyeong:17, options:[
+    { key:'sinktop', label:'싱크대 상판', title:'싱크대 상판은 어떤 소재로 할까요?', desc:'싱크대 기본가에 인조대리석이 포함되어 있어요 · 상위 소재는 추가금.', perMeter:true, lengthAnchors:[[25,3.6],[30,4.8],[42,7.4]], options:[
       { id:'himacs', label:'인조대리석(하이막스)', low:0, high:0, note:'싱크대 기본 사양 · 이음매 안 보이게 시공 가능 · 다양한 컬러' },
       { id:'kanstone', label:'엔지니어드스톤(칸스톤)', low:35, high:35, note:'인조대리석 대비 추가금 · 가공·물류·시공비 포함 · 단점 보완, 흠집에 강함' },
       { id:'ceramic', label:'세라믹', low:60, high:60, note:'대비 추가금 · 가장 예쁘고 위생적, 열에 강함 · 대신 이음매 티나고 비쌈' },
@@ -365,11 +396,36 @@
   function fmt(n){ return n.toLocaleString('ko-KR'); }
 
   // ---------- generic single-select step renderer ----------
+  let activeBathTab = 0;
+
   function renderGenericStep(def){
     const cols = def.options.length >= 5 ? '' : (def.options.length===2?'single-col':(def.options.length===3?'three':''));
+    let descHtml = def.desc;
+    if(def.perMeter){
+      const len = lengthFor(def).toFixed(1);
+      descHtml += ` <strong>입력하신 ${state.pyeong}평 기준 추정 길이 약 ${len}m로 계산돼요.</strong>`;
+    }
+
+    const isMultiBath = def.perBath && state.bathCount > 1;
+    if(!Array.isArray(state.selections[def.key])){
+      const prev = typeof state.selections[def.key] === 'string' ? state.selections[def.key] : null;
+      state.selections[def.key] = def.perBath ? [prev] : state.selections[def.key];
+    }
+
+    let tabsHtml = '';
+    if(isMultiBath){
+      tabsHtml = `<div class="bath-tabs">`;
+      for(let i=0;i<state.bathCount;i++){
+        const filled = !!state.selections[def.key][i];
+        tabsHtml += `<button type="button" class="bath-tab ${i===activeBathTab?'active':''} ${filled?'filled':''}" data-i="${i}">욕실 ${i+1}${filled?' ✓':''}</button>`;
+      }
+      tabsHtml += `</div>`;
+    }
+
     let html = `<div class="step-body">
       <h2 class="step-title">${def.title}</h2>
-      <p class="step-desc">${def.desc}</p>
+      <p class="step-desc">${descHtml}</p>
+      ${tabsHtml}
       <div class="choice-grid ${cols}" id="grid_${def.key}">`;
     def.options.forEach((opt,i)=>{
       const { l, h } = optTotal(def, opt);
@@ -393,16 +449,45 @@
 
     const grid = document.getElementById(`grid_${def.key}`);
     const nextBtn = document.getElementById('nextBtn');
-    const saved = state.selections[def.key];
+
+    function currentSaved(){
+      return def.perBath ? state.selections[def.key][activeBathTab] : state.selections[def.key];
+    }
+    function allBathsFilled(){
+      if(!def.perBath) return !!state.selections[def.key];
+      for(let i=0;i<state.bathCount;i++){ if(!state.selections[def.key][i]) return false; }
+      return true;
+    }
+
+    const saved = currentSaved();
     grid.querySelectorAll('.choice').forEach(el=>{
-      if(el.dataset.id === saved){ el.classList.add('selected'); nextBtn.disabled=false; }
+      if(el.dataset.id === saved){ el.classList.add('selected'); }
       el.addEventListener('click', ()=>{
         grid.querySelectorAll('.choice').forEach(c=>c.classList.remove('selected'));
         el.classList.add('selected');
-        state.selections[def.key] = el.dataset.id;
-        nextBtn.disabled = false;
+        if(def.perBath){ state.selections[def.key][activeBathTab] = el.dataset.id; }
+        else { state.selections[def.key] = el.dataset.id; }
+        nextBtn.disabled = !allBathsFilled();
+        if(isMultiBath){
+          // refresh tab checkmarks without losing scroll position
+          document.querySelectorAll('.bath-tab').forEach((t,i)=>{
+            t.classList.toggle('filled', !!state.selections[def.key][i]);
+            t.textContent = `욕실 ${i+1}${state.selections[def.key][i]?' ✓':''}`;
+          });
+        }
       });
     });
+    nextBtn.disabled = !allBathsFilled();
+
+    if(isMultiBath){
+      document.querySelectorAll('.bath-tab').forEach(t=>{
+        t.addEventListener('click', ()=>{
+          activeBathTab = parseInt(t.dataset.i, 10);
+          renderGenericStep(def);
+        });
+      });
+    }
+
     document.getElementById('prevBtn').addEventListener('click', goPrev);
     nextBtn.addEventListener('click', goNext);
   }
@@ -595,9 +680,24 @@
     const rows = [];
 
     GENERIC_STEPS.forEach(def=>{
-      const selId = state.selections[def.key];
-      if(!selId) return;
-      const opt = def.options.find(o=>o.id===selId);
+      const sel = state.selections[def.key];
+      if(!sel) return;
+      if(def.perBath){
+        if(!Array.isArray(sel)) return;
+        let sumL=0, sumH=0; const labels=[];
+        for(let i=0;i<state.bathCount;i++){
+          const id = sel[i];
+          if(!id) return; // incomplete selection for this step, skip entirely
+          const opt = def.options.find(o=>o.id===id);
+          const { l, h } = optTotal(def, opt);
+          sumL += l; sumH += h;
+          labels.push(state.bathCount>1 ? `욕실${i+1} ${opt.label}` : opt.label);
+        }
+        low += sumL; high += sumH;
+        rows.push([def.label, labels.join(' · '), sumL, sumH]);
+        return;
+      }
+      const opt = def.options.find(o=>o.id===sel);
       const { l, h } = optTotal(def, opt);
       low += l; high += h;
       rows.push([def.label, opt.label, l, h]);
@@ -707,7 +807,7 @@
     else if(key==='jungmun'){ headLabel.textContent='중문'; renderJungmun(); }
     else if(key==='contact'){ headLabel.textContent='연락처'; renderContact(); }
     else if(key==='result'){ headLabel.textContent='결과'; renderResult(); }
-    else { const def = STEP_BY_KEY[key]; headLabel.textContent=def.label; renderGenericStep(def); }
+    else { const def = STEP_BY_KEY[key]; headLabel.textContent=def.label; activeBathTab = 0; renderGenericStep(def); }
 
     panelHost.parentElement.querySelector('.card') || null;
     const activeCard = document.querySelector('.card');
