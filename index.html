@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>채움디자인 · 세상에서 가장 편한 견적</title>
+<title>채움디자인 · 예상 견적서</title>
+<meta property="og:title" content="채움디자인 · 예상 견적서" />
+<meta property="og:description" content="3분이면 우리 집 리모델링 예상 견적을 확인할 수 있어요." />
+<meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"></script>
@@ -214,16 +217,16 @@
   // DATA: 27 generic single-select steps
   // ============================================================
   const GENERIC_STEPS = [
-    { key:'demolition', label:'철거 범위', title:'어떤 방향으로 진행할까요? (철거 범위 포함)', desc:'평당 단가 × 입력하신 평형 기준으로 계산돼요.', perPyeong:true, options:[
-      { id:'budget', label:'예산 중심형', low:14, high:19, note:'철거 최소화 · 기본철거·붙박이가구 철거·바닥재/조명/도배 철거' },
-      { id:'common', label:'공용부 집중형', low:25, high:32, note:'예산중심형 포함 · 욕실 타일철거 후 방수·배관 위치이동·주방 설비이동' },
-      { id:'highend', label:'하이엔드 마감', low:2000, high:2000, fixed:true, openEnded:true, note:'공용부집중형 포함 · 천장·벽체 전체철거·전선 모두 교체·발코니 방수 · 상담 내용에 따라 금액 변동' },
+    { key:'demolition', label:'철거 범위', title:'어떤 방향으로 진행할까요? (철거 범위 포함)', desc:'평당 단가 × 입력하신 평형 기준으로 계산돼요. (평단가는 기업이윤 포함 금액)', perPyeong:true, options:[
+      { id:'budget', label:'실속형', low:14, high:19, note:'기본적인 철거 및 정리 공사를 중심으로 진행합니다.<br/>✓ 기본 철거 및 폐기물 처리<br/>✓ 싱크대 및 주방가구 철거<br/>✓ 바닥재 부분 철거<br/>✓ 조명 및 기존 전기설비 정리<br/>✓ 도배 제거<br/>✓ 욕실 기존 마감재 및 기구 철거<br/>✓ 폐기물 수거 및 처리' },
+      { id:'common', label:'공용부 집중형', low:25, high:32, note:'기본 철거에 주요 공간의 철거·정리 공정을 추가한 구성입니다.<br/>✓ 실속형 공정 전체 포함<br/>✓ 욕실 타일 및 방수층 철거<br/>✓ 욕실 급·배수 설비 정리<br/>✓ 주방 싱크대 및 주변 마감 철거<br/>✓ 현관 바닥 및 벽체 철거<br/>✓ 주요 공간의 기존 마감재 정리' },
+      { id:'highend', label:'하이엔드 철거', low:2000, high:2000, fixed:true, openEnded:true, note:'전체 공간을 새롭게 구성하기 위한 전면 철거 단계입니다.<br/>✓ 천장 및 벽체 전체 철거<br/>✓ 기존 바닥 및 마감재 전체 철거<br/>✓ 기존 가구 및 설비 전면 철거<br/>✓ 욕실 바닥·벽체 및 방수층 철거<br/>✓ 주방 및 현관 전체 철거<br/>✓ 각종 기존 설비 및 마감재 정리<br/>✓ 폐기물 반출 및 현장 정리<br/>※ 상담 내용에 따라 금액이 변동될 수 있습니다.' },
     ]},
     { key:'sash', label:'샷시(창호)', title:'샷시(창호) 교체하시나요?', desc:'컨셉 기준 추천값이 미리 선택되어 있어요. 평당 단가 × 평형 기준.', perPyeong:true, options:[
-      { id:'viewframe', label:'뷰프레임', low:55, high:60, note:'LX하우시스 · 10년 보증 · 비교적 고가, 브랜드 가치값' },
-      { id:'kcc', label:'KCC / 영림', low:45, high:50, note:'13년 이상 보증 · 뷰프레임 대비 저렴하나 눈차 미미' },
-      { id:'local', label:'예림', low:35, high:40, note:'대리점 자체보증 · 브랜드 대비 저렴하나 품질보증 애매' },
-      { id:'film', label:'필름랩핑', low:8, high:10, note:'창틀에 큰 문제 없을 때, 샷시는 그대로 두고 필름으로 커버' },
+      { id:'viewframe', label:'LX하우시스', low:45, high:50, note:'10년 이상 사용을 고려한 고급 창호로, 단열성과 내구성은 물론 브랜드 선호도까지 높은 제품입니다.' },
+      { id:'kcc', label:'KCC / 영림', low:35, high:40, note:'우수한 단열 성능과 합리적인 가격대를 갖춘 중상급 창호 제품입니다.' },
+      { id:'local', label:'예림', low:25, high:30, note:'가격 부담을 낮추면서도 기본적인 단열과 기밀 성능을 갖춘 실속형 창호입니다.' },
+      { id:'film', label:'필름랩핑', low:8, high:10, note:'기존 창호의 상태가 양호하다면 전체 교체 대신 프레임에 필름을 적용해 분위기를 새롭게 바꿀 수 있습니다.' },
       { id:'keep', label:'현상태 유지', low:0, high:0, note:'현재 샷시 상태가 좋고 깨끗하다면 이 선택이 유리' },
     ]},
     { key:'wallpaper', label:'벽체·천장 마감재', title:'벽체와 천장 마감재는 어떤 자재로 할까요?', desc:'전용면적 평당 단가(자재+시공) 기준. 평당 단가 × 평형.', perPyeong:true, options:[
@@ -497,8 +500,8 @@
     panelHost.innerHTML = `<div class="step-body">
       <h2 class="step-title">어느 지역, 어느 단지신가요?</h2>
       <p class="step-desc">지역과 아파트명(단지명)을 알려주시면 더 정확한 견적에 도움이 돼요.</p>
-      <div class="field"><label for="regionInput">지역</label><input type="text" id="regionInput" placeholder="예) 서울 송파구" value="${state.region}"/></div>
-      <div class="field"><label for="aptInput">아파트명 (단지명)</label><input type="text" id="aptInput" placeholder="예) 장미아파트" value="${state.aptName}"/></div>
+      <div class="field"><label for="regionInput">지역</label><input type="text" id="regionInput" placeholder="예) OOO시 OOO구" value="${state.region}"/></div>
+      <div class="field"><label for="aptInput">아파트명 (단지명)</label><input type="text" id="aptInput" placeholder="예) OOO아파트" value="${state.aptName}"/></div>
     </div>
     <div class="step-nav">
       <button class="btn btn-ghost" id="prevBtn" disabled>이전</button>
@@ -524,7 +527,6 @@
         <div class="stepper-num"><span id="pyVal">${state.pyeong}</span><span class="unit">평</span></div>
         <button class="stepper-btn" id="pyUp">+</button>
       </div>
-      <p class="stepper-hint">10평 ~ 60평 사이에서 선택해 주세요</p>
       <div class="divider"></div>
       <h2 class="step-title" style="font-size:16px;">리모델링할 욕실은 몇 개인가요?</h2>
       <div class="stepper-box" style="padding:14px 0 4px 0;">
