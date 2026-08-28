@@ -64,14 +64,18 @@
     font-family:'Pretendard',sans-serif; font-weight:700; font-size:12.5px; color:var(--white); }
   .ci-title{ font-weight:700; font-size:14px; margin-bottom:3px; }
   .ci-price{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--brass-deep); font-weight:600; margin-bottom:2px;}
-  .ci-sub{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-bottom:5px; }
+  .ci-sub{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-bottom:10px; }
   .bath-tabs{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
   .bath-tab{ font-family:'Pretendard',sans-serif; font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:100px;
     border:1.5px solid var(--line); background:var(--white); color:var(--ink-soft); cursor:pointer; transition:.15s ease; }
   .bath-tab:hover{ border-color:var(--brass); }
   .bath-tab.active{ background:var(--ink); border-color:var(--ink); color:var(--white); }
   .bath-tab.filled:not(.active){ border-color:var(--brass); color:var(--brass-deep); }
-  .ci-note{ font-size:11px; color:var(--ink-soft); line-height:1.5; }
+  .ci-note{ font-size:11px; color:var(--ink-soft); line-height:1.5; margin-top:8px; }
+  .note-intro{ margin:0 0 10px 0; }
+  .note-list{ margin:0; padding-left:16px; }
+  .note-list li{ margin-bottom:3px; }
+  .note-footer2{ margin-top:8px; color:#9C9385; font-size:10.5px; }
   .check{ position:absolute; top:12px; right:12px; width:17px; height:17px; border-radius:50%; border:1.5px solid var(--line); background:var(--white); }
   .choice.selected .check{ border-color:var(--brass); background:var(--brass); }
   .choice.selected .check::after{ content:""; display:block; width:5px; height:9px; border:solid white; border-width:0 2px 2px 0; transform:rotate(45deg); margin:2px auto 0 auto; }
@@ -88,6 +92,10 @@
   .stepper-btn{ width:40px; height:40px; border-radius:50%; border:1.5px solid var(--line); background:var(--white); font-size:18px; color:var(--ink); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.15s ease; }
   .stepper-btn:hover{ border-color:var(--brass); color:var(--brass-deep); }
   .stepper-num{ font-family:'IBM Plex Mono',monospace; font-size:36px; font-weight:700; min-width:120px; text-align:center; }
+  .stepper-input{ font-family:'IBM Plex Mono',monospace; font-size:36px; font-weight:700; text-align:center; width:90px;
+    border:none; border-bottom:2px solid var(--line); background:transparent; color:var(--ink); padding:0 0 2px 0; }
+  .stepper-input:focus{ outline:none; border-bottom-color:var(--brass); }
+  .stepper-input::-webkit-inner-spin-button, .stepper-input::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
   .stepper-num .unit{ font-size:16px; color:var(--ink-soft); margin-left:4px; }
   .stepper-hint{ text-align:center; font-size:12px; color:var(--ink-soft); margin-top:6px; }
   .divider{ height:1px; background:var(--line); margin:22px 0 18px 0; }
@@ -121,7 +129,25 @@
   .success-box{ display:none; } .success-box.show{ display:block; }
   .cta-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   .cta-row .btn{ padding:13px 24px; font-size:14px; }
+  .btn-sm{ padding:8px 14px !important; font-size:12px !important; }
+  .result-section-title{ font-size:15px; font-weight:700; color:var(--ink); text-align:left; margin:26px 0 4px 0; }
+  .result-hint{ font-size:11.5px; color:var(--ink-soft); text-align:left; margin:0 0 14px 0; }
+  .result-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; }
+  .result-item{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--white); }
+  .result-swatch{ position:relative; height:64px; display:flex; align-items:center; justify-content:center;
+    font-family:'Pretendard',sans-serif; font-weight:700; font-size:12.5px; color:#fff; cursor:pointer; text-align:center; padding:6px; }
+  .result-overlay{ position:absolute; inset:0; background:rgba(31,42,61,0.72); display:none; align-items:center; justify-content:center; }
+  .result-item.show-overlay .result-overlay{ display:flex; }
+  .result-label{ font-size:11.5px; font-weight:700; color:var(--ink); padding:8px 10px 0 10px; }
+  .result-value{ font-size:11px; color:var(--ink-soft); padding:2px 10px 10px 10px; line-height:1.4; }
   footer{ max-width:720px; margin:0 auto; padding:0 20px 50px 20px; text-align:center; font-size:11px; color:var(--ink-soft); }
+  @media print{
+    .topbar, .head, .step-nav, .cta-row, .result-overlay, footer{ display:none !important; }
+    body{ background:#fff; }
+    .card{ box-shadow:none !important; border:none !important; }
+    .stage{ margin:0 !important; padding:0 !important; max-width:100% !important; }
+    .result-grid{ grid-template-columns:1fr 1fr 1fr; }
+  }
   .step-panel{ display:none; } .step-panel.active{ display:block; animation:fadeUp .3s ease; }
   @keyframes fadeUp{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
   @media (prefers-reduced-motion: reduce){ .step-panel.active{ animation:none; } .progress-fill{ transition:none; } }
@@ -160,6 +186,9 @@
   function colorFor(i){ return COLORS[i % COLORS.length]; }
 
   // ---------- pricing helpers (shared by card display + final compute) ----------
+  const PROFIT_MARGIN = 1.25; // 기업이윤 25% — 모든 단가에 일괄 적용
+  function mLow(opt){ return opt.low*PROFIT_MARGIN; }
+  function mHigh(opt){ return opt.high*PROFIT_MARGIN; }
   function rangeText(low, high){
     return low===high ? fmt(low) : fmt(low)+'~'+fmt(high);
   }
@@ -190,27 +219,52 @@
   }
   function optTotal(def, opt){
     if(opt.low===0 && opt.high===0) return {l:0, h:0};
-    if(opt.fixed) return {l:opt.low, h:opt.high};
-    if(def.perPyeong) return {l:opt.low*state.pyeong, h:opt.high*state.pyeong};
+    const lo = mLow(opt), hi = mHigh(opt);
+    if(opt.fixed) return {l:lo, h:hi};
+    if(def.perPyeong) return {l:lo*state.pyeong, h:hi*state.pyeong};
     if(def.perMeter){
       const len = lengthFor(def);
-      return {l:opt.low*len, h:opt.high*len};
+      return {l:lo*len, h:hi*len};
     }
-    if(def.perBath) return {l:opt.low, h:opt.high};
-    return {l:opt.low, h:opt.high};
+    if(def.perBath) return {l:lo, h:hi};
+    return {l:lo, h:hi};
   }
   function priceLabelFor(l, h, openEnded){
     if(l===0 && h===0) return '0원';
     if(Math.round(l)===Math.round(h)) return fmt(Math.round(l))+'만원'+(openEnded?' 이상':'');
     return fmt(Math.round(l))+'~'+fmt(Math.round(h))+'만원';
   }
+  // Formats a note string into: intro paragraph, blank-line gap, checklist (✓ lines), footnote (※ lines).
+  // Applies uniformly across every step so the "평당 단가 줄바꿈 + 설명 끝난 뒤 줄바꿈" layout is consistent everywhere.
+  function formatNote(note){
+    if(!note) return '';
+    const parts = note.split('<br/>');
+    let html = '';
+    let listOpen = false;
+    parts.forEach(p=>{
+      const t = p.trim();
+      if(t.startsWith('✓')){
+        if(!listOpen){ html += '<ul class="note-list">'; listOpen = true; }
+        html += `<li>${t.slice(1).trim()}</li>`;
+      } else if(t.startsWith('※')){
+        if(listOpen){ html += '</ul>'; listOpen = false; }
+        html += `<div class="note-footer2">${t}</div>`;
+      } else if(t.length){
+        if(listOpen){ html += '</ul>'; listOpen = false; }
+        html += `<p class="note-intro">${t}</p>`;
+      }
+    });
+    if(listOpen) html += '</ul>';
+    return html;
+  }
   function unitSubtext(def, opt){
     if(opt.low===0 && opt.high===0) return null;
     if(opt.fixed) return null;
-    if(def.perPyeong) return `평당 ${rangeText(opt.low,opt.high)}만원 × ${state.pyeong}평`;
+    const lo = mLow(opt), hi = mHigh(opt);
+    if(def.perPyeong) return `평당 ${rangeText(Math.round(lo),Math.round(hi))}만원 × ${state.pyeong}평`;
     if(def.perMeter){
       const len = lengthFor(def).toFixed(1);
-      return `M당 ${rangeText(opt.low,opt.high)}만원 × ${len}m`;
+      return `M당 ${rangeText(Math.round(lo),Math.round(hi))}만원 × ${len}m`;
     }
     return null;
   }
@@ -225,22 +279,21 @@
       { id:'highend', label:'하이엔드 전면 철거', low:2000, high:2000, fixed:true, openEnded:true, note:'구조 변경 및 레이아웃을 완전히 새롭게 재구성하기 위한 전체 철거 단계입니다. 천장부터 바닥, 설비까지 완전히 비워내고 프리미엄 공간을 만들고자 할 때 적합합니다.<br/>✓ 천장 및 벽체 전체 철거<br/>✓ 기존 바닥재 및 마감재 전체 철거<br/>✓ 기존 가구 및 설비 전면 철거<br/>✓ 욕실 바닥·벽체 철거 및 방수층 완전 제거<br/>✓ 주방 및 현관 전체 철거<br/>✓ 각종 기존 설비 및 마감재 정리<br/>✓ 폐기물 반출 및 현장 보양·정리<br/>※ 상담 내용에 따라 금액이 변동될 수 있습니다.' },
     ]},
     { key:'sash', label:'샷시(창호)', title:'샷시(창호), 어떤 제품으로 선택할까요?', desc:'컨셉에 맞춰 미리 추천드리는 대표적인 창호 옵션입니다. 평당 예상 단가와 전체 면적을 기준으로 대략적인 비용을 확인해보세요.', perPyeong:true, options:[
-      { id:'viewframe', label:'LX하우시스', low:45, high:50, note:'10년 이상 사용할 창호인 만큼 단열성과 내구성을 중요하게 생각한다면 추천드리는 제품입니다. 고급스러운 디자인과 우수한 기밀 성능을 갖춘 실용적인 선택지입니다.' },
-      { id:'kcc', label:'KCC / 영림', low:35, high:40, note:'합리적인 가격대에서 단열과 기본적인 성능을 균형 있게 고려할 수 있는 제품입니다. 실용성과 비용 효율을 함께 원하는 경우 적합한 선택입니다.' },
-      { id:'local', label:'예림', low:25, high:30, note:'부담을 낮추면서도 기본적인 단열 및 기밀 성능을 갖춘 실속형 창호입니다. 가격을 중요하게 고려하면서 무난한 성능을 원하는 경우 추천드립니다.' },
-      { id:'film', label:'필름 래핑', low:8, high:10, note:'기존 창호의 상태가 양호하다면 전체 교체 대신 필름 시공으로 분위기를 바꿀 수 있습니다. 비용 부담을 줄이면서 실내 분위기와 창호의 색상을 새롭게 연출하고 싶을 때 활용하기 좋은 방법입니다.' },
+      { id:'viewframe', label:'LX하우시스', low:50, high:55, note:'10년 이상 사용할 창호인 만큼 단열성과 내구성을 중요하게 생각한다면 추천드리는 제품입니다. 고급스러운 디자인과 우수한 기밀 성능을 갖춘 실용적인 선택지입니다.' },
+      { id:'kcc', label:'KCC / 영림', low:40, high:45, note:'합리적인 가격대에서 단열과 기본적인 성능을 균형 있게 고려할 수 있는 제품입니다. 실용성과 비용 효율을 함께 원하는 경우 적합한 선택입니다.' },
+      { id:'local', label:'예림', low:30, high:35, note:'부담을 낮추면서도 기본적인 단열 및 기밀 성능을 갖춘 실속형 창호입니다. 가격을 중요하게 고려하면서 무난한 성능을 원하는 경우 추천드립니다.' },
+      { id:'film', label:'필름 래핑', low:13, high:15, note:'기존 창호의 상태가 양호하다면 전체 교체 대신 필름 시공으로 분위기를 바꿀 수 있습니다. 비용 부담을 줄이면서 실내 분위기와 창호의 색상을 새롭게 연출하고 싶을 때 활용하기 좋은 방법입니다.' },
       { id:'keep', label:'기존 창호 유지', low:0, high:0, note:'현재 설치된 샷시의 상태가 양호하고 특별한 문제가 없다면 기존 창호를 그대로 사용하는 것도 좋은 방법입니다. 교체 비용을 절감하면서 다른 공사에 예산을 집중할 수 있습니다.' },
     ]},
     { key:'wallpaper', label:'벽체·천장 마감재', title:'벽체·천장 마감재, 어떤 자재로 선택할까요?', desc:'전용면적 평당 단가(자재+시공)와 입력하신 평형을 기준으로 산정한 대략적인 비용입니다. 원하시는 분위기와 자재 등급에 따라 대략적인 예산을 확인해보세요.', perPyeong:true, options:[
-      { id:'silk', label:'실크도배', low:18, high:20, note:'가장 흔하게 사용되는 대중적인 마감재로, 깔끔한 마감과 실용성을 겸비한 옵션입니다. 합리적인 비용으로 깔끔한 실내 공간을 연출하고 싶을 때 추천드립니다.<br/>✓ 현장이 깨끗하고 짐이 없는 노멀 기준<br/>✓ 퍼티 작업 포함<br/>✓ 공용부 무몰딩 적용<br/>✓ 올초배 시공' },
-      { id:'diamang', label:'디아망', low:20, high:22, note:'입체적인 질감과 고급스러운 엠보 패턴이 특징인 프리미엄 도배지입니다. 일반 실크도배보다 두툼하여 도장 느낌의 모던한 질감을 연출하고 싶을 때 적합합니다.<br/>✓ 디아망 등급 (동급 신한벽지 파사드·회벽 모던 질감 포함)' },
-      { id:'diamangfortis', label:'디아망포티스', low:22, high:24, note:'디아망의 고급스러운 질감에 내구성과 오염 저항성을 더욱 강화한 하이엔드 도배지입니다. 스크래치에 강하고 내구성이 뛰어난 프리미엄 마감을 원하는 경우 베스트 선택입니다.<br/>✓ LX하우시스 디아망포티스 (동급 신한벽지 파사드월가드 포함)' },
+      { id:'silk', label:'실크도배', low:8, high:10, note:'가장 흔하게 사용되는 대중적인 마감재로, 깔끔한 마감과 실용성을 겸비한 옵션입니다. 합리적인 비용으로 깔끔한 실내 공간을 연출하고 싶을 때 추천드립니다.<br/>✓ 현장이 깨끗하고 짐이 없는 노멀 기준<br/>✓ 퍼티 작업 포함<br/>✓ 공용부 무몰딩 적용<br/>✓ 올초배 시공' },
+      { id:'diamang', label:'디아망', low:10, high:12, note:'입체적인 질감과 고급스러운 엠보 패턴이 특징인 프리미엄 도배지입니다. 일반 실크도배보다 두툼하여 도장 느낌의 모던한 질감을 연출하고 싶을 때 적합합니다.<br/>✓ 디아망 등급 (동급 신한벽지 파사드·회벽 모던 질감 포함)' },
+      { id:'diamangfortis', label:'디아망포티스', low:13, high:15, note:'디아망의 고급스러운 질감에 내구성과 오염 저항성을 더욱 강화한 하이엔드 도배지입니다. 스크래치에 강하고 내구성이 뛰어난 프리미엄 마감을 원하는 경우 베스트 선택입니다.<br/>✓ LX하우시스 디아망포티스 (동급 신한벽지 파사드월가드 포함)' },
     ]},
     { key:'floor', label:'바닥재', title:'바닥재, 무엇으로 선택할까요?', desc:'전용면적 평당 단가(자재+시공)와 입력하신 평형을 기준으로 산정한 대략적인 비용입니다. 선호하는 디자인과 보행감, 내구성에 따라 대략적인 예산을 확인해보세요. <span class="note-footer">※ 현장 상태 및 바닥 평탄화 작업 여부에 따라 실제 견적은 달라질 수 있습니다.</span>', perPyeong:true, options:[
       { id:'wood', label:'강마루(동화마루 그란데)', low:11, high:14, note:'가장 많은 사랑을 받는 베스트셀러 바닥재입니다. 원목마루 대비 스크래치와 찍힘에 강하며, 관리와 내구성이 뛰어난 무난한 선택지입니다.<br/>✓ 베스트 아이템 / 가장 많은 선택<br/>✓ 원목마루 대비 우수한 내스크래치성' },
       { id:'porcelain', label:'포세린타일(600×600)', low:18, high:25, note:'고급 주거 공간에 많이 시공되는 모던하고 세련된 자재입니다. 표면이 단단하고 오염 관리가 편하지만, 접지감이 딱딱하고 물건을 떨어뜨렸을 때 틈새 손상이나 깨짐 위험이 있습니다.<br/>✓ 고급 주거 공간 선호 시공<br/>✓ 단단한 표면 및 편리한 유지 관리<br/>✓ 접지감 단단함 / 틈새 깨짐 주의 필요' },
       { id:'vinyl32', label:'장판(3.2T)', low:6, high:8, note:'합리적인 가격으로 실속 있게 시공할 수 있는 마감재입니다. 물에 강해 관리가 용이하지만, 무거운 가구 등에 의해 찌그러짐이 발생할 수 있습니다.<br/>✓ 물에 강한 방수성 / 저렴하고 합리적인 비용<br/>✓ 눌림 및 찌그러짐 발생 가능' },
-      { id:'vinyl5', label:'장판(5T)', low:7, high:9, note:'3.2T 제품보다 두께감이 있어 푹신하고 우수한 발감을 자랑하는 보급형 마감재입니다. 기본 장판보다 가격대는 소폭 높지만, 한층 더 편안한 쿠션감을 제공합니다.<br/>✓ 3.2T 대비 뛰어난 두께감 및 푹신한 발감<br/>✓ 기본 장판 대비 단가 소폭 상승' },
       { id:'solidwood', label:'원목마루(지복득마루)', low:28, high:45, note:'천연 원목 그대로의 질감을 담아 압도적인 고급스러움과 최상의 보행감을 제공하는 하이엔드 자재입니다. 자연스러운 원목 느낌을 살릴 수 있으나, 습기에 약하고 찍힘에 주의가 필요합니다.<br/>✓ 천연 원목 소재의 고급스러운 연출 및 최상급 보행감<br/>✓ 물과 습기에 취약 / 찍힘 주의 필요' },
     ]},
     { key:'sink', label:'싱크대', title:'싱크대, 어떤 방식으로 선택할까요?', desc:'평수로 추정한 싱크대 길이와 미터당 단가를 기준으로 산정한 대략적인 비용입니다. 원하시는 브랜드, 마감 품질, 커스텀 자유도에 따라 예산을 확인해보세요. <span class="note-footer">※ 주방 구조(一자, L자, ㄷ자 등) 및 특수 가전 빌트인 여부에 따라 실제 견적은 달라질 수 있습니다.</span>', perMeter:true, lengthAnchors:[[25,3.6],[30,4.8],[42,7.4]], options:[
@@ -371,7 +424,7 @@
   const state = {
     region:'', aptName:'', pyeong:24, bathCount:1,
     selections:{}, // key -> option id
-    balcony:{ living:false, kitchen:false, roomCount:0 },
+    balcony:{ living:false, kitchen:false, roomCount:0, keep:false },
     jungmun:{ styleId:null, count:0 },
     name:'', phone:'', consent:false,
   };
@@ -386,12 +439,13 @@
       if(k==='sash') flow.push('balcony');
       if(k==='sinkfaucet') flow.push('jungmun');
     });
-    flow.push('contact','result');
+    flow.push('result','contact');
     return flow;
   }
   const FLOW = buildFlow();
-  const TOTAL_STEPS = FLOW.length - 1; // exclude result from denominator display
+  const TOTAL_STEPS = FLOW.length - 1; // exclude contact from denominator display (result is the "preview" step)
   let flowIndex = 0;
+  let editReturnIndex = null; // when set, "다음"/선택 완료 후 이 인덱스(결과 화면)로 돌아감
 
   const STEP_BY_KEY = {};
   GENERIC_STEPS.forEach(s=>{ STEP_BY_KEY[s.key]=s; });
@@ -445,7 +499,7 @@
         <div class="ci-title">${opt.label}</div>
         <div class="ci-price">${priceLabel}</div>
         ${sub ? `<div class="ci-sub">${sub}</div>` : ''}
-        <div class="ci-note">${opt.note}</div>
+        <div class="ci-note">${formatNote(opt.note)}</div>
       </div>`;
     });
     html += `</div></div>
@@ -537,14 +591,15 @@
       <h2 class="step-title">평형 (전용면적 기준)</h2>
       <div class="stepper-box">
         <button class="stepper-btn" id="pyDown">−</button>
-        <div class="stepper-num"><span id="pyVal">${state.pyeong}</span><span class="unit">평</span></div>
+        <div class="stepper-num"><input type="number" id="pyInput" class="stepper-input" value="${state.pyeong}" min="10" max="60"/><span class="unit">평</span></div>
         <button class="stepper-btn" id="pyUp">+</button>
       </div>
+      <p class="stepper-hint">숫자를 직접 눌러서 입력할 수도 있어요</p>
       <div class="divider"></div>
       <h2 class="step-title" style="font-size:16px;">리모델링할 욕실 개수</h2>
       <div class="stepper-box" style="padding:14px 0 4px 0;">
         <button class="stepper-btn" id="bathDown">−</button>
-        <div class="stepper-num" style="font-size:30px; min-width:90px;"><span id="bathVal">${state.bathCount}</span><span class="unit">개</span></div>
+        <div class="stepper-num" style="font-size:30px; min-width:90px;"><input type="number" id="bathInput" class="stepper-input" style="font-size:30px; width:70px;" value="${state.bathCount}" min="1" max="4"/><span class="unit">개</span></div>
         <button class="stepper-btn" id="bathUp">+</button>
       </div>
     </div>
@@ -552,12 +607,21 @@
       <button class="btn btn-ghost" id="prevBtn">이전</button>
       <button class="btn btn-primary" id="nextBtn">다음</button>
     </div>`;
-    const pyVal = document.getElementById('pyVal');
-    const bathVal = document.getElementById('bathVal');
-    document.getElementById('pyUp').addEventListener('click', ()=>{ state.pyeong=Math.min(60,state.pyeong+1); pyVal.textContent=state.pyeong; });
-    document.getElementById('pyDown').addEventListener('click', ()=>{ state.pyeong=Math.max(10,state.pyeong-1); pyVal.textContent=state.pyeong; });
-    document.getElementById('bathUp').addEventListener('click', ()=>{ state.bathCount=Math.min(4,state.bathCount+1); bathVal.textContent=state.bathCount; });
-    document.getElementById('bathDown').addEventListener('click', ()=>{ state.bathCount=Math.max(1,state.bathCount-1); bathVal.textContent=state.bathCount; });
+    const pyInput = document.getElementById('pyInput');
+    const bathInput = document.getElementById('bathInput');
+    const clampPy = v => Math.min(60, Math.max(10, isNaN(v)?10:v));
+    const clampBath = v => Math.min(4, Math.max(1, isNaN(v)?1:v));
+
+    document.getElementById('pyUp').addEventListener('click', ()=>{ state.pyeong=clampPy(state.pyeong+1); pyInput.value=state.pyeong; });
+    document.getElementById('pyDown').addEventListener('click', ()=>{ state.pyeong=clampPy(state.pyeong-1); pyInput.value=state.pyeong; });
+    pyInput.addEventListener('input', ()=>{ const v=parseInt(pyInput.value,10); if(!isNaN(v)) state.pyeong=clampPy(v); });
+    pyInput.addEventListener('blur', ()=>{ pyInput.value=state.pyeong; });
+
+    document.getElementById('bathUp').addEventListener('click', ()=>{ state.bathCount=clampBath(state.bathCount+1); bathInput.value=state.bathCount; });
+    document.getElementById('bathDown').addEventListener('click', ()=>{ state.bathCount=clampBath(state.bathCount-1); bathInput.value=state.bathCount; });
+    bathInput.addEventListener('input', ()=>{ const v=parseInt(bathInput.value,10); if(!isNaN(v)) state.bathCount=clampBath(v); });
+    bathInput.addEventListener('blur', ()=>{ bathInput.value=state.bathCount; });
+
     document.getElementById('prevBtn').addEventListener('click', goPrev);
     document.getElementById('nextBtn').addEventListener('click', goNext);
   }
@@ -568,9 +632,10 @@
       <h2 class="step-title">발코니 확장, 어디를 진행할까요?</h2>
       <p class="step-desc">순정 공사비(창호·마감 제외) 기준의 예상 비용입니다. 원하시는 위치와 방 개수에 따라 대략적인 예산을 확인해보세요.</p>
       <div class="choice-grid three">
-        <div class="choice" id="bal_living"><div class="check"></div><div class="swatch" style="background:${colorFor(0)}">거실</div><div class="ci-title">거실</div><div class="ci-price">250~330만원</div><div class="ci-note">거실 공간을 넓게 활용하기 위한 확장 공사입니다. 개방감을 높여 생활 공간을 더욱 넓게 연출하고 싶을 때 적합합니다.<br/>✓ 순정 확장 실측 견적 기준</div></div>
-        <div class="choice" id="bal_kitchen"><div class="check"></div><div class="swatch" style="background:${colorFor(1)}">주방</div><div class="ci-title">주방</div><div class="ci-price">200~280만원</div><div class="ci-note">주방 동선과 수납공간을 확보하기 위한 확장 공사입니다. 조리 공간을 넓히거나 가전 배치를 한층 효율적으로 구성할 수 있습니다.<br/>✓ 순정 확장 실측 견적 기준</div></div>
-        <div class="choice" id="bal_room"><div class="check"></div><div class="swatch" style="background:${colorFor(2)}">방</div><div class="ci-title">방</div><div class="ci-price">200~280만원</div><div class="ci-note">침실이나 드레스룸, 서재 등 목적에 맞춰 방 공간을 넓히는 공사입니다. 필요에 따라 원하는 방의 개수를 선택하여 진행할 수 있습니다.<br/>✓ 개당 비용 적용 (개수 선택 가능)</div></div>
+        <div class="choice" id="bal_living"><div class="check"></div><div class="swatch" style="background:${colorFor(0)}">거실</div><div class="ci-title">거실</div><div class="ci-price">${fmt(Math.round(150*PROFIT_MARGIN))}~${fmt(Math.round(280*PROFIT_MARGIN))}만원</div><div class="ci-note">${formatNote('거실 공간을 넓게 활용하기 위한 확장 공사입니다. 개방감을 높여 생활 공간을 더욱 넓게 연출하고 싶을 때 적합합니다.<br/>✓ 순정 확장 실측 견적 기준')}</div></div>
+        <div class="choice" id="bal_kitchen"><div class="check"></div><div class="swatch" style="background:${colorFor(1)}">주방</div><div class="ci-title">주방</div><div class="ci-price">${fmt(Math.round(100*PROFIT_MARGIN))}~${fmt(Math.round(200*PROFIT_MARGIN))}만원</div><div class="ci-note">${formatNote('주방 동선과 수납공간을 확보하기 위한 확장 공사입니다. 조리 공간을 넓히거나 가전 배치를 한층 효율적으로 구성할 수 있습니다.<br/>✓ 순정 확장 실측 견적 기준')}</div></div>
+        <div class="choice" id="bal_room"><div class="check"></div><div class="swatch" style="background:${colorFor(2)}">방</div><div class="ci-title">방</div><div class="ci-price">${fmt(Math.round(100*PROFIT_MARGIN))}~${fmt(Math.round(200*PROFIT_MARGIN))}만원</div><div class="ci-note">${formatNote('침실이나 드레스룸, 서재 등 목적에 맞춰 방 공간을 넓히는 공사입니다. 필요에 따라 원하는 방의 개수를 선택하여 진행할 수 있습니다.<br/>✓ 개당 비용 적용 (개수 선택 가능)')}</div></div>
+        <div class="choice" id="bal_keep"><div class="check"></div><div class="swatch" style="background:${colorFor(3)}">현상태 유지</div><div class="ci-title">현상태 유지</div><div class="ci-price">0원</div><div class="ci-note">${formatNote('발코니 확장 없이 현재 상태 그대로 진행하는 방식입니다.')}</div></div>
       </div>
       <div id="roomCountBox" style="display:none;">
         <div class="divider"></div>
@@ -589,21 +654,42 @@
     const livingEl = document.getElementById('bal_living');
     const kitchenEl = document.getElementById('bal_kitchen');
     const roomEl = document.getElementById('bal_room');
+    const keepEl = document.getElementById('bal_keep');
     const roomCountBox = document.getElementById('roomCountBox');
     const roomVal = document.getElementById('roomVal');
+
+    function syncKeepState(){
+      const anyActive = state.balcony.living || state.balcony.kitchen || state.balcony.roomCount>0;
+      keepEl.classList.toggle('selected', !anyActive && state.balcony.keep);
+    }
 
     if(state.balcony.living) livingEl.classList.add('selected');
     if(state.balcony.kitchen) kitchenEl.classList.add('selected');
     if(state.balcony.roomCount>0){ roomEl.classList.add('selected'); roomCountBox.style.display='block'; }
+    if(state.balcony.keep) keepEl.classList.add('selected');
 
-    livingEl.addEventListener('click', ()=>{ state.balcony.living=!state.balcony.living; livingEl.classList.toggle('selected'); });
-    kitchenEl.addEventListener('click', ()=>{ state.balcony.kitchen=!state.balcony.kitchen; kitchenEl.classList.toggle('selected'); });
+    function clearKeep(){ state.balcony.keep=false; keepEl.classList.remove('selected'); }
+
+    livingEl.addEventListener('click', ()=>{ state.balcony.living=!state.balcony.living; livingEl.classList.toggle('selected'); if(state.balcony.living) clearKeep(); });
+    kitchenEl.addEventListener('click', ()=>{ state.balcony.kitchen=!state.balcony.kitchen; kitchenEl.classList.toggle('selected'); if(state.balcony.kitchen) clearKeep(); });
     roomEl.addEventListener('click', ()=>{
       const on = !roomEl.classList.contains('selected');
       roomEl.classList.toggle('selected');
       state.balcony.roomCount = on ? Math.max(1,state.balcony.roomCount) : 0;
       roomVal.textContent = state.balcony.roomCount || 1;
       roomCountBox.style.display = on ? 'block' : 'none';
+      if(on) clearKeep();
+    });
+    keepEl.addEventListener('click', ()=>{
+      state.balcony.keep = !state.balcony.keep;
+      if(state.balcony.keep){
+        state.balcony.living=false; state.balcony.kitchen=false; state.balcony.roomCount=0;
+        livingEl.classList.remove('selected'); kitchenEl.classList.remove('selected'); roomEl.classList.remove('selected');
+        roomCountBox.style.display='none';
+        keepEl.classList.add('selected');
+      } else {
+        keepEl.classList.remove('selected');
+      }
     });
     document.getElementById('roomUp').addEventListener('click', ()=>{ state.balcony.roomCount=Math.min(5,(state.balcony.roomCount||1)+1); roomVal.textContent=state.balcony.roomCount; });
     document.getElementById('roomDown').addEventListener('click', ()=>{ state.balcony.roomCount=Math.max(1,(state.balcony.roomCount||1)-1); roomVal.textContent=state.balcony.roomCount; });
@@ -623,8 +709,8 @@
     styles.forEach((s,i)=>{
       optsHtml += `<div class="choice" data-id="${s.id}"><div class="check"></div>
         <div class="swatch" style="background:${colorFor(i)}">${s.label}</div>
-        <div class="ci-title">${s.label}</div><div class="ci-price">${fmt(s.low)}~${fmt(s.high)}만원</div>
-        <div class="ci-note">${s.note}</div></div>`;
+        <div class="ci-title">${s.label}</div><div class="ci-price">${fmt(Math.round(s.low*PROFIT_MARGIN))}~${fmt(Math.round(s.high*PROFIT_MARGIN))}만원</div>
+        <div class="ci-note">${formatNote(s.note)}</div></div>`;
     });
     panelHost.innerHTML = `<div class="step-body">
       <h2 class="step-title">중문, 어떤 스타일로 설치할까요?</h2>
@@ -663,16 +749,22 @@
   // ---------- contact ----------
   function renderContact(){
     panelHost.innerHTML = `<div class="step-body">
-      <h2 class="step-title">예상 견적을 확인할 연락처를 남겨주세요</h2>
-      <p class="step-desc">입력하신 정보는 견적 안내 목적으로만 사용돼요.</p>
+      <h2 class="step-title">무료 상담을 신청하시겠어요?</h2>
+      <p class="step-desc">이 견적 그대로 실제 상담을 받아보실 수 있어요. 연락처를 남겨주시면 채움디자인이 직접 연락드립니다.</p>
       <div class="field"><label for="nameInput">이름</label><input type="text" id="nameInput" placeholder="홍길동" value="${state.name}"/></div>
       <div class="field"><label for="phoneInput">연락처</label><input type="tel" id="phoneInput" placeholder="010-0000-0000" value="${state.phone}"/></div>
       <label class="consent"><input type="checkbox" id="consentCheck" ${state.consent?'checked':''}/>
       <span>개인정보 수집·이용에 동의합니다. 입력하신 정보는 견적 상담 목적 외에는 사용되지 않으며, 상담 완료 후 파기됩니다.</span></label>
+      <div id="contactPreSubmit"></div>
+      <div class="success-box" id="successBox">
+        <p style="font-weight:700; font-size:15px; margin-bottom:6px;">상담 신청이 접수됐어요 ✓</p>
+        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:18px;">빠른 시일 내에 채움디자인이 직접 연락드릴게요.</p>
+        <div class="cta-row"><a class="btn btn-ghost" href="tel:01075075681">전화로 바로 문의</a></div>
+      </div>
     </div>
     <div class="step-nav">
       <button class="btn btn-ghost" id="prevBtn">이전</button>
-      <button class="btn btn-primary" id="nextBtn" disabled>예상 견적 확인하기</button>
+      <button class="btn btn-primary" id="nextBtn" disabled>무료 상담 신청하기</button>
     </div>`;
     const nameInput = document.getElementById('nameInput');
     const phoneInput = document.getElementById('phoneInput');
@@ -683,9 +775,46 @@
     consentCheck.addEventListener('change', validate);
     validate();
     document.getElementById('prevBtn').addEventListener('click', goPrev);
-    nextBtn.addEventListener('click', ()=>{
+    nextBtn.addEventListener('click', function(){
       state.name=nameInput.value.trim(); state.phone=phoneInput.value.trim(); state.consent=consentCheck.checked;
-      goNext();
+
+      const { low, high, rows } = computeTotal();
+      const subject = '[채움디자인] 온라인 견적 상담 신청 - '+state.name;
+      const bodyLines = ['이름: '+state.name, '연락처: '+state.phone, '지역: '+state.region, '아파트명: '+state.aptName,
+        '평형: '+state.pyeong+'평', '욕실: '+state.bathCount+'개', '예상 견적: '+fmt(low)+'만원 ~ '+fmt(high)+'만원', '', '--- 선택 항목 ---'];
+      rows.forEach(([label,val])=>bodyLines.push(label+': '+val));
+      const bodyText = bodyLines.join('\n');
+      const submitBtn = this;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '전송 중...';
+
+      const FORMSPREE_ID = 'mkjwkevo';
+      const endpoint = 'https://formspree.io/f/'+FORMSPREE_ID;
+
+      fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Accept':'application/json' },
+        body: JSON.stringify({
+          _subject: subject,
+          이름: state.name, 연락처: state.phone, 지역: state.region, 아파트명: state.aptName,
+          평형: state.pyeong+'평', 욕실: state.bathCount+'개',
+          예상견적: fmt(low)+'만원 ~ '+fmt(high)+'만원',
+          상세내역: bodyText,
+        }),
+      }).then(res=>{
+        if(res.ok){
+          submitBtn.style.display='none';
+          document.getElementById('prevBtn').style.display='none';
+          document.getElementById('successBox').classList.add('show');
+        } else {
+          throw new Error('전송 실패');
+        }
+      }).catch(()=>{
+        const mailBody = encodeURIComponent(bodyText);
+        window.location.href = 'mailto:chaeum_89@naver.com?subject='+encodeURIComponent(subject)+'&body='+mailBody;
+        submitBtn.disabled = false;
+        submitBtn.textContent = '무료 상담 신청하기';
+      });
     });
   }
 
@@ -709,28 +838,29 @@
           labels.push(state.bathCount>1 ? `욕실${i+1} ${opt.label}` : opt.label);
         }
         low += sumL; high += sumH;
-        rows.push([def.label, labels.join(' · '), sumL, sumH]);
+        rows.push([def.label, labels.join(' · '), sumL, sumH, def.key]);
         return;
       }
       const opt = def.options.find(o=>o.id===sel);
       const { l, h } = optTotal(def, opt);
       low += l; high += h;
-      rows.push([def.label, opt.label, l, h]);
+      rows.push([def.label, opt.label, l, h, def.key]);
     });
 
     // balcony
     let bl=0, bh=0;
-    if(state.balcony.living){ bl+=250; bh+=330; }
-    if(state.balcony.kitchen){ bl+=200; bh+=280; }
-    if(state.balcony.roomCount>0){ bl+=200*state.balcony.roomCount; bh+=280*state.balcony.roomCount; }
-    if(bl>0||bh>0){ low+=bl; high+=bh; rows.push(['발코니 확장', (state.balcony.living?'거실 ':'')+(state.balcony.kitchen?'주방 ':'')+(state.balcony.roomCount>0?'방 '+state.balcony.roomCount+'개':''), bl, bh]); }
+    if(state.balcony.living){ bl+=150*PROFIT_MARGIN; bh+=280*PROFIT_MARGIN; }
+    if(state.balcony.kitchen){ bl+=100*PROFIT_MARGIN; bh+=200*PROFIT_MARGIN; }
+    if(state.balcony.roomCount>0){ bl+=100*PROFIT_MARGIN*state.balcony.roomCount; bh+=200*PROFIT_MARGIN*state.balcony.roomCount; }
+    if(bl>0||bh>0){ low+=bl; high+=bh; rows.push(['발코니 확장', (state.balcony.living?'거실 ':'')+(state.balcony.kitchen?'주방 ':'')+(state.balcony.roomCount>0?'방 '+state.balcony.roomCount+'개':''), bl, bh, 'balcony']); }
+    else if(state.balcony.keep){ rows.push(['발코니 확장', '현상태 유지', 0, 0, 'balcony']); }
 
     // jungmun
     if(state.jungmun.styleId && state.jungmun.count>0){
       const d = state.jungmun._data;
-      const jl = d.low*state.jungmun.count, jh = d.high*state.jungmun.count;
+      const jl = d.low*PROFIT_MARGIN*state.jungmun.count, jh = d.high*PROFIT_MARGIN*state.jungmun.count;
       low+=jl; high+=jh;
-      rows.push(['중문', d.label+' × '+state.jungmun.count+'개소', jl, jh]);
+      rows.push(['중문', d.label+' × '+state.jungmun.count+'개소', jl, jh, 'jungmun']);
     }
 
     const round = n => Math.round(n/10)*10;
@@ -740,11 +870,25 @@
   // ---------- result ----------
   function renderResult(){
     const { low, high, rows } = computeTotal();
-    let rowsHtml = `<div class="summary-row"><span class="k">위치</span><span class="v">${state.region} · ${state.aptName}</span></div>
-      <div class="summary-row"><span class="k">평형 / 욕실</span><span class="v">${state.pyeong}평 · ${state.bathCount}개</span></div>`;
-    rows.forEach(([label,val,l,h])=>{
-      const priceStr = (l===0&&h===0) ? '0원' : (Math.round(l)===Math.round(h) ? fmt(Math.round(l))+'만원' : fmt(Math.round(l))+'~'+fmt(Math.round(h))+'만원');
-      rowsHtml += `<div class="summary-row"><span class="k">${label} · ${val}</span><span class="v">${priceStr}</span></div>`;
+
+    const items = [];
+    items.push({ key:'location', label:'위치', value:`${state.region} · ${state.aptName}` });
+    items.push({ key:'pyeong', label:'평형 / 욕실', value:`${state.pyeong}평 · ${state.bathCount}개` });
+    rows.forEach(([label,val,l,h,key])=>{
+      const priceStr = priceLabelFor(Math.round(l), Math.round(h));
+      items.push({ key, label, value: val, price: priceStr });
+    });
+
+    let gridHtml = '';
+    items.forEach((it,i)=>{
+      gridHtml += `<div class="result-item" data-key="${it.key}">
+        <div class="result-swatch" style="background:${colorFor(i)}">
+          <span>${it.label}</span>
+          <div class="result-overlay"><button type="button" class="btn btn-brass btn-sm result-edit-btn">항목 변경하기</button></div>
+        </div>
+        <div class="result-label">${it.label}</div>
+        <div class="result-value">${it.value}${it.price?` · ${it.price}`:''}</div>
+      </div>`;
     });
 
     panelHost.innerHTML = `<div class="result-wrap">
@@ -754,56 +898,37 @@
         <div class="dimline-rule"></div>
         <div class="dimline-cap"><span>MIN</span><span>MAX</span></div>
       </div>
-      <div class="disclaimer">입력하신 항목을 기준으로 한 <strong>참고용 예상 견적</strong>입니다. 실제 금액은 현장 실측과 자재 선택에 따라 달라질 수 있으며, 정확한 견적은 무료 방문 상담 후 확정해 드립니다.</div>
-      <div class="summary-scroll">${rowsHtml}</div>
-      <div id="preSubmit"><div class="cta-row"><button class="btn btn-brass" id="submitBtn">무료 상담 신청하기</button></div></div>
-      <div class="success-box" id="successBox">
-        <p style="font-weight:700; font-size:15px; margin-bottom:6px;">상담 신청이 접수됐어요 ✓</p>
-        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:18px;">빠른 시일 내에 채움디자인이 직접 연락드릴게요.</p>
-        <div class="cta-row"><a class="btn btn-ghost" href="tel:01075075681">전화로 바로 문의</a></div>
+      <div class="disclaimer">입력하신 항목을 기준으로 한 <strong>참고용 예상 견적</strong>입니다. 실제 금액은 현장 실측과 자재 선택에 따라 달라질 수 있으며, 정확한 견적은 무료 방문 상담 후 확정해 드립니다.<br/><br/>이 견적 그대로 실제 상담을 받아보실 수 있어요. 실제 상담을 받아보신 후 최종 결정을 하실 수 있습니다.</div>
+
+      <div class="result-section-title">공사리스트</div>
+      <p class="result-hint">해당 사진을 선택하면 수정이 가능합니다.</p>
+      <div class="result-grid" id="resultGrid">${gridHtml}</div>
+
+      <div class="cta-row" style="margin-top:22px;">
+        <button class="btn btn-ghost" id="pdfBtn">PDF로 저장</button>
+        <button class="btn btn-brass" id="toContactBtn">무료 상담 신청하기</button>
       </div>
     </div>
     <div class="step-nav"><button class="btn btn-ghost" id="prevBtn">이전</button><button class="btn btn-ghost" id="restartBtn">처음부터 다시</button></div>`;
 
-    document.getElementById('submitBtn').addEventListener('click', function(){
-      const subject = '[채움디자인] 온라인 견적 상담 신청 - '+state.name;
-      const bodyLines = ['이름: '+state.name, '연락처: '+state.phone, '지역: '+state.region, '아파트명: '+state.aptName,
-        '평형: '+state.pyeong+'평', '욕실: '+state.bathCount+'개', '예상 견적: '+fmt(low)+'만원 ~ '+fmt(high)+'만원', '', '--- 선택 항목 ---'];
-      rows.forEach(([label,val])=>bodyLines.push(label+': '+val));
-      const bodyText = bodyLines.join('\n');
-      const submitBtn = this;
-      submitBtn.disabled = true;
-      submitBtn.textContent = '전송 중...';
-
-      // 자동 이메일 전송 (Formspree). FORM_ID를 발급받은 값으로 교체하세요.
-      const FORMSPREE_ID = 'mkjwkevo';
-      const endpoint = 'https://formspree.io/f/'+FORMSPREE_ID;
-
-      fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json', 'Accept':'application/json' },
-        body: JSON.stringify({
-          _subject: subject,
-          이름: state.name, 연락처: state.phone, 지역: state.region, 아파트명: state.aptName,
-          평형: state.pyeong+'평', 욕실: state.bathCount+'개',
-          예상견적: fmt(low)+'만원 ~ '+fmt(high)+'만원',
-          상세내역: bodyText,
-        }),
-      }).then(res=>{
-        if(res.ok){
-          document.getElementById('preSubmit').style.display='none';
-          document.getElementById('successBox').classList.add('show');
-        } else {
-          throw new Error('전송 실패');
-        }
-      }).catch(()=>{
-        // 자동 전송 실패 시 메일 앱 열기로 대체
-        const mailBody = encodeURIComponent(bodyText);
-        window.location.href = 'mailto:chaeum_89@naver.com?subject='+encodeURIComponent(subject)+'&body='+mailBody;
-        submitBtn.disabled = false;
-        submitBtn.textContent = '무료 상담 신청하기';
+    // swatch click -> toggle overlay; overlay button click -> navigate to that step for editing
+    document.querySelectorAll('.result-item').forEach(item=>{
+      item.querySelector('.result-swatch').addEventListener('click', ()=>{
+        const isOpen = item.classList.contains('show-overlay');
+        document.querySelectorAll('.result-item').forEach(el=>el.classList.remove('show-overlay'));
+        if(!isOpen) item.classList.add('show-overlay');
       });
+      const editBtn = item.querySelector('.result-edit-btn');
+      if(editBtn){
+        editBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          goEdit(item.dataset.key);
+        });
+      }
     });
+
+    document.getElementById('pdfBtn').addEventListener('click', ()=>{ window.print(); });
+    document.getElementById('toContactBtn').addEventListener('click', goNext);
     document.getElementById('restartBtn').addEventListener('click', restart);
     document.getElementById('prevBtn').addEventListener('click', goPrev);
   }
@@ -824,16 +949,47 @@
     else if(key==='result'){ headLabel.textContent='결과'; renderResult(); }
     else { const def = STEP_BY_KEY[key]; headLabel.textContent=def.label; activeBathTab = 0; renderGenericStep(def); }
 
-    panelHost.parentElement.querySelector('.card') || null;
-    const activeCard = document.querySelector('.card');
+    // edit-return mode: relabel the confirm button so it's clear this jumps back to the result screen
+    if(editReturnIndex !== null && key !== 'result'){
+      const nextBtn = document.getElementById('nextBtn');
+      if(nextBtn) nextBtn.textContent = '변경완료 · 결과로 돌아가기';
+      const prevBtn = document.getElementById('prevBtn');
+      if(prevBtn){ prevBtn.textContent = '결과로 돌아가기'; prevBtn.disabled = false; }
+    }
   }
 
-  function goNext(){ flowIndex = Math.min(flowIndex+1, FLOW.length-1); render(); window.scrollTo({top:0, behavior:'smooth'}); }
-  function goPrev(){ flowIndex = Math.max(flowIndex-1, 0); render(); window.scrollTo({top:0, behavior:'smooth'}); }
+  function goNext(){
+    if(editReturnIndex !== null){
+      flowIndex = editReturnIndex;
+      editReturnIndex = null;
+      render();
+      window.scrollTo({top:0, behavior:'smooth'});
+      return;
+    }
+    flowIndex = Math.min(flowIndex+1, FLOW.length-1); render(); window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function goPrev(){
+    if(editReturnIndex !== null){
+      flowIndex = editReturnIndex;
+      editReturnIndex = null;
+      render();
+      window.scrollTo({top:0, behavior:'smooth'});
+      return;
+    }
+    flowIndex = Math.max(flowIndex-1, 0); render(); window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function goEdit(stepKey){
+    const idx = FLOW.indexOf(stepKey);
+    if(idx === -1) return;
+    editReturnIndex = flowIndex; // remember to come back to result
+    flowIndex = idx;
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
 
   function restart(){
     state.region=''; state.aptName=''; state.pyeong=24; state.bathCount=1;
-    state.selections={}; state.balcony={living:false,kitchen:false,roomCount:0};
+    state.selections={}; state.balcony={living:false,kitchen:false,roomCount:0,keep:false};
     state.jungmun={styleId:null,count:0}; state.name=''; state.phone=''; state.consent=false;
     flowIndex=0; render();
   }
