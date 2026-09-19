@@ -284,6 +284,12 @@
     if(def.lengthAnchors) return estimateLength(def.lengthAnchors, state.pyeong);
     return def.refLength*state.pyeong/def.refPyeong;
   }
+  // 현재 평형 기준 싱크대 추정 길이 (주방/싱크대 단계 기준)
+  function sinkLengthText(){
+    const def = GENERIC_STEPS.find(s=>(s.key==='kitchen'||s.key==='sink') && s.lengthAnchors);
+    if(!def) return '';
+    return lengthFor(def).toFixed(1)+'m';
+  }
   function isEx(defKey, partId){
     return !!(state.excludes[defKey] && state.excludes[defKey][partId]);
   }
@@ -1094,7 +1100,7 @@
       const { low, high, rows } = computeTotal();
       const subject = '[채움디자인] 온라인 견적 상담 신청 - '+state.name;
       const bodyLines = ['이름: '+state.name, '연락처: '+state.phone, '이메일: '+(state.email||'-'), '지역: '+state.region, '아파트명: '+state.aptName,
-        '평형: '+state.pyeong+'평', '욕실: '+state.bathCount+'개', '공사 시작일: '+(state.startDate||'-'), '입주 예정일: '+(state.moveDate||'-'), '공사 예산: '+(state.budget||'-'), '예상 견적: '+fmt(low)+'만원 ~ '+fmt(high)+'만원', '', '요청사항: '+(state.request||'-'), '', '--- 선택 항목 ---'];
+        '평형: '+state.pyeong+'평', '욕실: '+state.bathCount+'개', '싱크대 예상 길이: '+sinkLengthText(), '공사 시작일: '+(state.startDate||'-'), '입주 예정일: '+(state.moveDate||'-'), '공사 예산: '+(state.budget||'-'), '예상 견적: '+fmt(low)+'만원 ~ '+fmt(high)+'만원', '', '요청사항: '+(state.request||'-'), '', '--- 선택 항목 ---'];
       rows.forEach(([label,val])=>bodyLines.push(label+': '+val));
       const bodyText = bodyLines.join('\n');
       const submitBtn = this;
@@ -1110,7 +1116,7 @@
         body: JSON.stringify({
           _subject: subject,
           이름: state.name, 연락처: state.phone, 이메일: state.email||'-', 지역: state.region, 아파트명: state.aptName,
-          평형: state.pyeong+'평', 욕실: state.bathCount+'개',
+          평형: state.pyeong+'평', 욕실: state.bathCount+'개', 싱크대예상길이: sinkLengthText(),
           공사시작일: state.startDate||'-', 입주예정일: state.moveDate||'-', 공사예산: state.budget||'-',
           예상견적: fmt(low)+'만원 ~ '+fmt(high)+'만원',
           요청사항: state.request||'-',
